@@ -1,0 +1,1 @@
+~/Library/Application\ Support/Neo4j\ Desktop/Application/neo4jDatabases/database-01021071-ac8f-4940-9756-71f48cf28bb2/installation-4.1.0/plugin

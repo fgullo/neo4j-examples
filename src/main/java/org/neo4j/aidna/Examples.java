@@ -26,7 +26,8 @@ public class Examples{
 	@Context
 	public Log log;
 
-    @Procedure(value = "org.neo4j.aidna.examples.hello")
+//    @Procedure(name = "org.neo4j.aidna.examples.hello", mode = "READ")
+    @Procedure
     @Description("Just a simple 'Hello World!'")
     public Stream<StringOutput> hello(@Name("nodeId") long nodeId) {
  		
@@ -45,7 +46,8 @@ public class Examples{
         return Arrays.stream(new StringOutput[]{new StringOutput(msg)});
     }
 
-    @Procedure(value = "org.neo4j.aidna.examples.densestSubgraph")
+    @Procedure(name = "org.neo4j.aidna.examples.densestSubgraph", mode = "READ")
+//    @Procedure
     @Description("Charikar's 2-approximation greedy algorithm for the densest-subgraph problem")
     public Stream<DensestSubgraphOutput> densestSubgraph() {
 
