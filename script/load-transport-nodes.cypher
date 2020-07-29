@@ -1,4 +1,4 @@
-#'transport-nodes.csv' must be in '<neo4j-home>\import directory'
+//'transport-nodes.csv' must be in '<neo4j-home>\import directory'
 
 WITH "file:///" AS base WITH base + "transport-nodes.csv" AS uri
 LOAD CSV WITH HEADERS FROM uri AS row
