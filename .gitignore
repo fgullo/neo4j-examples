@@ -1,5 +1,6 @@
 .DS_Store
 target
+data/DBLP
 
 # Compiled class file
 *.class
