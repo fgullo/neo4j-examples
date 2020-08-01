@@ -25,13 +25,13 @@ Risultati:
         * Entrambi gli algoritmi sono stati runnati con 'concurrency = 1', ossia senza che l'esecuzione beneficiasse di thread multipli operanti in parallelo
     - Il mio algoritmo per densest subgraph ha runnato invece in:
     	* 351 s, la versione "single transaction" (ossia, dove faccio tutta la computazione in un'unica transazione, che chiudo solo at the very end; N.B.: Neo4j vuole che tutte le interazioni col DB vengano sempre svolte all'interno di una transazione, anche se si tratta di sole operazioni di lettura)
-    	* 370 s, la versione "multiple transaction" (in cui apro e chiudo una transazione ogni volta che devo leggere i vicini di un nodo)
+    	* 370 s, la versione "multiple transaction" (in cui apro e chiudo una transazione ogni volta che devo leggere i vicini di un nodo dal DB)
     	* La memoria occupata è sempre stata poco più di 1GB
 
 I risultati della GDS library mi sembrano molto buoni.
 Anche i risultati del mio densest subgraph non sembrano male: è vero che l'algoritmo è lineare, quindi forse ~6 minuti per un grafo di ~1M di nodi e ~4M di archi non è pochissimo, però c'è da considerare il fatto che l'algoritmo non sfrutta tale 'mutable in-memory graph' model (https://neo4j.com/graph-data-science-library/), che viene invece usato dagli algoritmi della GDS library, a quanto pare.
 
-Quindi, in futuro, quando si tratterà di scrivere algoritmi più seriamente, basterà stare un attimo attenti ad interagire con il mutable in-memory graph in maniera opportuna (basterà guardare il sorgente di uno degli algoritmi della GDS library, credo e/o dicumentarsi un pò meglio su questo aspetto).
+Quindi, in futuro, quando si tratterà di scrivere algoritmi più seriamente, basterà stare un attimo attenti ad interagire con il mutable in-memory graph in maniera opportuna (basterà guardare il sorgente di uno degli algoritmi della GDS library, credo e/o documentarsi un pò meglio su questo aspetto).
 
 Magari nei prossimi giorni provo ad andare ulteriormente oltre con la size del grafo.
 
