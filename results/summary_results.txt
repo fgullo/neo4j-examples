@@ -1,0 +1,41 @@
+Ciao,
+
+vi riporto il resoconto degli ultimi test fatti con Neo4j (per iscritto, così ce lo ritroviamo).
+
+In realtà, le news sono positive.
+Le cattive news dell'ultima settimana erano dovute più che altro a cazzate mie, ossia:
+    - La lentezza del caricamento delle relazioni tra nodi (in fase di creazione di un nuovo graph DB) era dovuta al fatto che: 
+        (i) non creavo l'indice per i nodi, una volta caricati, e 
+        (ii) usavo lo statement MERGE in fase di creazione, che controlla la non esistenza di nodi/relazioni duplicati/e in fase di creazione (cosa che mi faceva esplodere la memoria). 
+    Il primo problema si risolve semplicemente creando l'indice a valle del caricamento dei nodi, mentre il secondo si risolve usando lo statement CREATE invece di MERGE (stando chiaramente attenti a far si che il file da caricare non contenga duplicati).
+    - La lentezza del densest subgraph (che, vi ricordo, ci metteva circa mezz'ora su un grafo con ~1M nodi e ~10M archi) era dovuta al fatto che l'algoritmo non era ottimizzato per multigrafi (mea culpa).
+
+Le ultime prove le ho fatte su un grafo semplice (no multigrafo, indiretto, senza proprietà sui nodi o sugli archi), con le seguenti caratteristiche:
+    - #nodi: 1,089,442
+    - #archi: 4,144,848
+    - #connected components: 45,561
+    - size (#nodes) of the largest connected component: 952,307
+
+Risultati:
+    - Il grafo viene creato (mediante caricamento da opportuni file csv) in poco: i nodi in pochi secondi, gli archi in 2 o 3 minuti al massimo
+    - Esplorando il grafo visualmente e/o con query cypher semplici, non ho notato alcun rallentamento ad occhio: mi pare che tutto sia piuttosto fluido
+    - Ho provato a runnare qualche algoritmo (a bassa complessità) incluso nella Neo4j Graph Data Science (GDS) library. In particolare:
+        * Il calcolo delle componenti connesse ha impiegato 524 ms
+        * PageRank (con numero iterazioni settato a 100) ha impiegato 14 s
+        * Entrambi gli algoritmi sono stati runnati con 'concurrency = 1', ossia senza che l'esecuzione beneficiasse di thread multipli operanti in parallelo
+    - Il mio algoritmo per densest subgraph ha runnato invece in:
+    	* 351 s, la versione "single transaction" (ossia, dove faccio tutta la computazione in un'unica transazione, che chiudo solo at the very end; N.B.: Neo4j vuole che tutte le interazioni col DB vengano sempre svolte all'interno di una transazione, anche se si tratta di sole operazioni di lettura)
+    	* 370 s, la versione "multiple transaction" (in cui apro e chiudo una transazione ogni volta che devo leggere i vicini di un nodo)
+    	* La memoria occupata è sempre stata poco più di 1GB
+
+I risultati della GDS library mi sembrano molto buoni.
+Anche i risultati del mio densest subgraph non sembrano male: è vero che l'algoritmo è lineare, quindi forse ~6 minuti per un grafo di ~1M di nodi e ~4M di archi non è pochissimo, però c'è da considerare il fatto che l'algoritmo non sfrutta tale 'mutable in-memory graph' model (https://neo4j.com/graph-data-science-library/), che viene invece usato dagli algoritmi della GDS library, a quanto pare.
+
+Quindi, in futuro, quando si tratterà di scrivere algoritmi più seriamente, basterà stare un attimo attenti ad interagire con il mutable in-memory graph in maniera opportuna (basterà guardare il sorgente di uno degli algoritmi della GDS library, credo e/o dicumentarsi un pò meglio su questo aspetto).
+
+Magari nei prossimi giorni provo ad andare ulteriormente oltre con la size del grafo.
+
+Ciao,
+Francesco
+
+P.S. Trovate tutto (codice, cypher script, e un minimo di istruzioni/documentazione) qui: https://github.com/fgullo/neo4j-examples
